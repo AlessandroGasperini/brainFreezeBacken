@@ -51,6 +51,14 @@ router.route("/removeSubject").delete(async function (req, res) {
                 }
             }
         })
+
+    db_connect.collection("accounts")
+        .findOne({
+            _id: ObjectId(credentials.id)
+        }, async function (err, isMatch) {
+            res.json(isMatch.subjects)
+
+        })
 })
 
 

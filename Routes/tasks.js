@@ -6,7 +6,7 @@ const dbo = require("../db/connect")
 const ObjectId = require("mongodb").ObjectId;
 
 
-
+//Hitta en uppgift med rätt level och ämnen
 router.route("/serachTasks").post(async function (req, res) {
     let credentials = req.body
     const task = credentials.subjects.join('')
@@ -58,6 +58,7 @@ router.route("/serachTasks").post(async function (req, res) {
 })
 
 
+// Skicka in gjord uppgift
 router.route("/doneTask").post(async function (req, res) {
     let credentials = req.body
     let db_connect = dbo.getDb()
@@ -81,7 +82,7 @@ router.route("/doneTask").post(async function (req, res) {
         })
 })
 
-
+// Ta bort pågående uppgift
 router.route("/deleteTask").delete(async function (req, res) {
     let credentials = req.body
     let db_connect = dbo.getDb()
@@ -101,7 +102,6 @@ router.route("/deleteTask").delete(async function (req, res) {
 
     res.json()
 })
-
 
 
 

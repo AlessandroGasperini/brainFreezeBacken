@@ -9,9 +9,9 @@ const ObjectId = require("mongodb").ObjectId;
 
 
 // Skapa konto
-router.route("/addAccount").post(async (req, ressponse) => {
+router.route("/addAccount").post(async (req, response) => {
     const credentials = req.body
-
+    console.log(credentials);
     const resObj = {
         success: true,
         usernameExists: false,
@@ -22,12 +22,44 @@ router.route("/addAccount").post(async (req, ressponse) => {
     credentials.password = hashedPassword;
 
     let db_connect = dbo.getDb()
-    db_connect.collection("accounts")
-        .insertOne(credentials, function (err, res) {
-            if (err) throw err
-            ressponse.json(res)
-        })
+
+
+    db_connect.collection('accounts').findOne({
+        username: credentials.username
+    }, async function (err, isMatch) {
+        if (isMatch) {
+            if (isMatch.username === credentials.username) {
+                resObj.usernameExists = true
+                resObj.success = false
+                response.json(resObj)
+            }
+        } else {
+            db_connect.collection('accounts').findOne({
+                email: credentials.email
+            }, async function (err, isMatch) {
+                if (isMatch) {
+                    if (isMatch.email === credentials.email) {
+                        resObj.emailExists = true
+                        resObj.success = false
+                        response.json(resObj)
+                    }
+                } else {
+                    response.json(resObj)
+                    let db_connect = dbo.getDb()
+                    db_connect.collection("accounts")
+                        .insertOne(credentials, function (err, res) {
+                            if (err) throw err
+                            response.json(resObj)
+                            response.status(200)
+                        })
+                }
+            })
+        }
+
+    })
+
 })
+
 
 //Logga in
 router.route("/login").post(async (req, response) => {
@@ -118,5 +150,32 @@ router.get('/', async (request, response) => {
     }
     response.json(resObj);
 });
+
+
+
+
+
+router.route("/changePassword").post(async (req, response) => {
+    const credentials = req.body
+    console.log(credentials);
+
+    const hashedPassword = await bcryptFunctions.hashPassword(credentials.newPassword);
+
+    let db_connect = dbo.getDb()
+
+    let findPlayer = {
+        email: credentials.email
+    }
+
+    await db_connect.collection("accounts")
+        .updateOne(findPlayer, {
+            $set: {
+                password: hashedPassword
+
+            }
+        })
+})
+
+
 
 module.exports = router

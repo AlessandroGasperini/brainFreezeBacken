@@ -15,6 +15,7 @@ app.use(require("./routes/accounts"))
 app.use(require("./routes/subjects"))
 app.use(require("./routes/tasks"))
 app.use(require("./routes/doneTasks"))
+app.use(require("./routes/email"))
 
 
 
