@@ -44,13 +44,12 @@ router.route("/addAccount").post(async (req, response) => {
                         response.json(resObj)
                     }
                 } else {
-                    response.json(resObj)
                     let db_connect = dbo.getDb()
                     db_connect.collection("accounts")
                         .insertOne(credentials, function (err, res) {
                             if (err) throw err
                             response.json(resObj)
-                            response.status(200)
+                            // response.status(200)
                         })
                 }
             })
@@ -114,10 +113,15 @@ router.route("/getAllUserInfo").post(async (request, response) => {
 
     let db_connect = dbo.getDb()
 
+
     db_connect.collection('accounts').findOne({
         _id: ObjectId(credentials.id)
     }, async function (err, isMatch) {
-        response.json(isMatch)
+        let sendInfo = {
+            ...isMatch,
+            password: "****"
+        }
+        response.json(sendInfo)
     })
 })
 

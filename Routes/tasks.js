@@ -106,6 +106,45 @@ router.route("/deleteTask").delete(async function (req, res) {
 
 
 
+// Lägg till ny uppgift
+router.route("/sendNewTask").post(async function (req, res) {
+    let credentials = req.body
+    console.log(credentials);
+
+    let db_connect = dbo.getDb()
+    let findCategory = {
+        subject: credentials.subject,
+        level: credentials.level
+    }
+
+    let newCategory = {
+        title: credentials.title,
+        tasks: [credentials.task],
+        subject: credentials.subject,
+        level: credentials.level
+    }
+
+    db_connect.collection("tasks")
+        .findOne({
+            subject: credentials.subject,
+            level: credentials.level
+        }, async function (err, isMatch) {
+            if (isMatch) {
+                await db_connect.collection("tasks")
+                    .updateOne(findCategory, {
+                        $push: {
+                            tasks: credentials.task
+                        }
+                    })
+            } else {
+                await db_connect.collection("tasks")
+                    .insertOne(newCategory, function (err, res) {
+                        console.log("Inlagt ny taskämne");
+                    })
+            }
+        })
+})
+
 
 
 
