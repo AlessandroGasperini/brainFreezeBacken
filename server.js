@@ -14,11 +14,11 @@ app.use(express.json());
 const dbo = require('./db/connect');
 
 
-app.use(require("./routes/accounts"))
-app.use(require("./routes/subjects"))
-app.use(require("./routes/tasks"))
-app.use(require("./routes/doneTasks"))
-app.use(require("./routes/email"))
+app.use(require("./Routes/accounts"))
+app.use(require("./Routes/subjects"))
+app.use(require("./Routes/tasks"))
+app.use(require("./Routes/doneTasks"))
+app.use(require("./Routes/email"))
 
 
 
