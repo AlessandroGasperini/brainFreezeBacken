@@ -5,7 +5,10 @@ require('dotenv').config({
     path: "./config.env"
 });
 const port = process.env.PORT || 3333;
-app.use(cors());
+
+app.use(cors({
+    origin: '*'
+}));
 app.use(express.json());
 
 const dbo = require('./db/connect');
