@@ -39,6 +39,7 @@ router.route("/resetPassword").post(async function (req, res) {
                 transporter.sendMail(mailOptions, function (error, info) {
                     if (error) {
                         console.log(error);
+                        res.status(400)
                     } else {
                         console.log("Email sent: ", info.response);
                     }
@@ -47,24 +48,6 @@ router.route("/resetPassword").post(async function (req, res) {
                 res.json(noEmail).status(200)
             }
         })
-
-
-    // Email info
-    const from = emailData.from
-    const to = emailData.to
-    const subject = emailData.subject
-    const message = emailData.message
-
-    // email som skickas ifrån
-    const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-            user: "phyllographen@gmail.com",
-            pass: "kjxibzyyxhvdvjkh"
-        }
-    })
-
-
 });
 
 

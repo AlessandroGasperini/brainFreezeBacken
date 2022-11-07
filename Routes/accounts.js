@@ -43,12 +43,12 @@ router.route("/addAccount").post(async (req, response) => {
                     if (isMatch.email === credentials.email) {
                         resObj.emailExists = true
                         resObj.success = false
-                        response.json(resObj).status(200)
+                        res.json(resObj).status(200)
                     }
                 } else {
                     let db_connect = dbo.getDb()
                     db_connect.collection("accounts")
-                        .insertOne(credentials, function (err, res) {
+                        .insertOne(credentials, function (err, result) {
                             if (err) response.status(400)
                             else
                                 response.json(resObj).status(200)

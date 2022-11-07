@@ -7,7 +7,6 @@ const ObjectId = require("mongodb").ObjectId;
 
 router.route("/addSubject").put(async function (req, res) {
     let credentials = req.body
-    // console.log(credentials);
     let db_connect = dbo.getDb()
     let myquery = {
         _id: ObjectId(credentials.userId)
@@ -29,7 +28,6 @@ router.route("/addSubject").put(async function (req, res) {
 
             if (isMatch.subjects.find(e => e.subject === credentials.subject)) {
                 console.log("Den finns, lägg inte till");
-                res.status(400)
             } else {
                 console.log("Den finns inte, lägg till");
                 await db_connect.collection("accounts").updateOne(myquery, updated, function (err, result) {
@@ -61,7 +59,7 @@ router.route("/removeSubject").delete(async function (req, res) {
     //Hitta en random uppgift som stämmer överens med det man efterfrågar (level och ämne)
     await db_connect.collection("accounts")
         .updateOne(findPlayer, updated, function (err, result) {
-            if (err) throw err
+            if (err) res.status(400)
             res.status(200)
         })
 
@@ -69,8 +67,8 @@ router.route("/removeSubject").delete(async function (req, res) {
         .findOne({
             _id: ObjectId(credentials.id)
         }, async function (err, isMatch) {
-            if (err) throw err
-            res.json(isMatch.subjects).status(200)
+            if (err) res.status(400)
+            res.json(isMatch.subjects)
         })
 })
 
