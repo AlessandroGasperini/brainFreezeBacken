@@ -4,12 +4,10 @@ const router = express.Router()
 
 const dbo = require("../db/connect")
 
-const ObjectId = require("mongodb").ObjectId;
 
 router.route("/resetPassword").post(async function (req, res) {
-
     let emailData = req.body
-    console.log(emailData);
+
     let noEmail = {
         res: false
     }
@@ -19,10 +17,10 @@ router.route("/resetPassword").post(async function (req, res) {
         .findOne({
             email: emailData.to
         }, async function (err, isMatch) {
-            console.log(isMatch);
+            if (err) response.status(400)
             if (isMatch) {
                 noEmail.res = true
-                res.json(noEmail)
+                res.json(noEmail).status(200)
 
                 const transporter = nodemailer.createTransport({
                     service: "gmail",
@@ -46,7 +44,7 @@ router.route("/resetPassword").post(async function (req, res) {
                     }
                 })
             } else {
-                res.json(noEmail)
+                res.json(noEmail).status(200)
             }
         })
 

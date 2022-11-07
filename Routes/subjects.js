@@ -12,27 +12,33 @@ router.route("/addSubject").put(async function (req, res) {
     let myquery = {
         _id: ObjectId(credentials.userId)
     }
+
+    let updated = {
+        $push: {
+            subjects: {
+                subject: credentials.subject,
+                title: credentials.title
+            }
+        }
+    }
     db_connect.collection("accounts")
         .findOne({
             _id: ObjectId(credentials.userId)
         }, async function (err, isMatch) {
+            if (err) response.status(400)
+
             if (isMatch.subjects.find(e => e.subject === credentials.subject)) {
                 console.log("Den finns, lägg inte till");
-                // res.status(400) ////
+                res.status(400)
             } else {
                 console.log("Den finns inte, lägg till");
-                await db_connect.collection("accounts").updateOne(myquery, {
-                    $push: {
-                        subjects: {
-                            subject: credentials.subject,
-                            title: credentials.title
-                        }
-                    }
+                await db_connect.collection("accounts").updateOne(myquery, updated, function (err, result) {
+                    if (err) response.status(400)
+                    res.status(200)
                 })
-                // res.status(200)
             }
         })
-    // 
+
 })
 
 
@@ -43,25 +49,32 @@ router.route("/removeSubject").delete(async function (req, res) {
     let findPlayer = {
         _id: ObjectId(credentials.id)
     }
+
+    let updated = {
+        $pull: {
+            subjects: {
+                subject: credentials.subject.subject
+
+            }
+        }
+    }
     //Hitta en random uppgift som stämmer överens med det man efterfrågar (level och ämne)
     await db_connect.collection("accounts")
-        .updateOne(findPlayer, {
-            $pull: {
-                subjects: {
-                    subject: credentials.subject.subject
-
-                }
-            }
+        .updateOne(findPlayer, updated, function (err, result) {
+            if (err) throw err
+            res.status(200)
         })
 
     db_connect.collection("accounts")
         .findOne({
             _id: ObjectId(credentials.id)
         }, async function (err, isMatch) {
-            res.json(isMatch.subjects)
-
+            if (err) throw err
+            res.json(isMatch.subjects).status(200)
         })
 })
+
+
 
 
 

@@ -26,29 +26,32 @@ router.route("/addAccount").post(async (req, response) => {
     db_connect.collection('accounts').findOne({
         username: credentials.username
     }, async function (err, isMatch) {
-        if (err) throw err
+        if (err) response.status(400)
         if (isMatch) {
             if (isMatch.username === credentials.username) {
                 resObj.usernameExists = true
                 resObj.success = false
-                response.json(resObj).status(200).send('Found');
+                response.json(resObj).status(200)
             }
         } else {
             db_connect.collection('accounts').findOne({
                 email: credentials.email
             }, async function (err, isMatch) {
+                if (err) response.status(400)
+
                 if (isMatch) {
                     if (isMatch.email === credentials.email) {
                         resObj.emailExists = true
                         resObj.success = false
-                        response.json(resObj).status(200).send('Found');
+                        response.json(resObj).status(200)
                     }
                 } else {
                     let db_connect = dbo.getDb()
                     db_connect.collection("accounts")
                         .insertOne(credentials, function (err, res) {
-                            if (err) throw err
-                            response.json(resObj).status(200).send('Found');
+                            if (err) response.status(400)
+                            else
+                                response.json(resObj).status(200)
                         })
                 }
             })
@@ -79,10 +82,10 @@ router.route("/login").post(async (req, response) => {
     db_connect.collection('accounts').findOne({
         username: credentials.username
     }, async function (err, isMatch) {
-        if (err) throw err
+        if (err) response.status(400)
         if (!isMatch) {
             console.log('WRONG USERNAME')
-            response.json(resObj).status(200).send('Found');
+            response.json(resObj).status(200)
         } else {
             console.log('CORRECT USERNAME')
             resObj.usernameExists = true
@@ -100,9 +103,9 @@ router.route("/login").post(async (req, response) => {
                 });
                 resObj.token = token
                 resObj.success = true
-                response.json(resObj).status(200).send('Found');
+                response.json(resObj).status(200)
             } else {
-                response.json(resObj).status(200).send('Found');
+                response.json(resObj).status(200)
             }
         }
     })
@@ -116,13 +119,13 @@ router.route("/getAllUserInfo").post(async (request, response) => {
     db_connect.collection('accounts').findOne({
         _id: ObjectId(credentials.id)
     }, async function (err, isMatch) {
-        if (err) throw err
+        if (err) response.status(400)
 
         let sendInfo = {
             ...isMatch,
             password: "****"
         }
-        response.json(sendInfo).status(200).send('Found');
+        response.json(sendInfo).status(200)
     })
 })
 

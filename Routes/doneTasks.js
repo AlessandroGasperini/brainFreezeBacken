@@ -16,8 +16,8 @@ router.route("/allMyDoneTasks").post(async function (req, res) {
             taskDoneBy: credentials.id
         })
         .toArray(function (err, result) {
-            if (err) throw err
-            res.json(result)
+            if (err) response.status(400)
+            res.json(result).status(200)
         })
 
 })
@@ -25,7 +25,6 @@ router.route("/allMyDoneTasks").post(async function (req, res) {
 
 router.route("/likeComment").put(async function (req, res) {
     let credentials = req.body
-    console.log(credentials);
 
     let db_connect = dbo.getDb();
     let myquery = {
@@ -41,9 +40,8 @@ router.route("/likeComment").put(async function (req, res) {
         .findOne({
             _id: ObjectId(credentials.id)
         }, async function (err, isMatch) {
+            if (err) response.status(400)
 
-
-            // if (credentials.likeOrDislike === "like") {
             const newArr = isMatch.feedback.map(obj => {
                 if (credentials.likeOrDislike === "like") {
 
@@ -93,10 +91,10 @@ router.route("/likeComment").put(async function (req, res) {
             await db_connect
                 .collection('doneTasks')
                 .updateOne(myquery, newObject, function (err, result) {
-                    if (err) throw err;
-                    res.json(newObject.$set);
+                    if (err) response.status(400)
+                    res.json(newObject.$set).status(200)
                 })
-            // }
+
         })
 })
 
@@ -113,8 +111,8 @@ router.route("/allTasks").post(async function (req, res) {
 
         })
         .toArray(function (err, result) {
-            if (err) throw err
-            res.json(result)
+            if (err) response.status(400)
+            res.json(result).status(200)
         })
 
 })
@@ -128,10 +126,9 @@ router.route("/allSubjects").get(async function (req, res) {
     db_connect.collection("subjects")
         .find({})
         .toArray(function (err, result) {
-            if (err) throw err
-            res.json(result)
+            if (err) response.status(400)
+            res.json(result).status(200)
         })
-
 })
 
 
@@ -163,11 +160,9 @@ router.route("/addComment").post(async function (req, res) {
         .findOne({
             _id: ObjectId(credentials.questionId)
         }, async function (err, isMatch) {
-            res.json(isMatch.feedback)
-
+            if (err) response.status(400)
+            res.json(isMatch.feedback).status(200)
         })
-
-
 
 })
 

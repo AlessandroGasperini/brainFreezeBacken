@@ -15,12 +15,26 @@ router.route("/serachTasks").post(async function (req, res) {
         taskFound: false,
         taskAlreadyExists: false
     }
+
+    let updated = {
+        $push: {
+            tasksInProgress: {
+                ...randomTask,
+                subject: isMatch.subject,
+                title: isMatch.title,
+                level: isMatch.level
+            }
+        }
+    }
+
     //Hitta en random uppgift som stämmer överens med det man efterfrågar (level och ämne)
     db_connect.collection("tasks")
         .findOne({
             level: credentials.level,
             subject: task
         }, async function (err, isMatch) {
+            if (err) response.status(400)
+
             if (isMatch) {
                 resObj.taskFound = true
                 const randomTask = isMatch.tasks[Math.floor(Math.random() * isMatch.tasks.length)];
@@ -29,29 +43,21 @@ router.route("/serachTasks").post(async function (req, res) {
                     .findOne({
                         _id: ObjectId(credentials.id)
                     }, async function (err, player) {
-                        console.log(player.tasksInProgress);
-                        console.log(isMatch.name);
-
+                        if (err) response.status(400)
                         if (player.tasksInProgress.find(e => e.name === randomTask.name)) {
                             resObj.taskAlreadyExists = true
                             console.log("Denna uppgift är redan tilllagd i din profil");
-                            res.send(resObj)
+                            res.json(resObj).status(200)
                         } else {
-                            res.send(resObj)
-                            await db_connect.collection("accounts").updateOne(player, {
-                                $push: {
-                                    tasksInProgress: {
-                                        ...randomTask,
-                                        subject: isMatch.subject,
-                                        title: isMatch.title,
-                                        level: isMatch.level
-                                    }
-                                }
+                            res.json(resObj).status(200) //////////// 400???????????+++
+                            await db_connect.collection("accounts").updateOne(player, updated, function (err, result) {
+                                if (err) response.status(400)
+                                res.status(200)
                             })
                         }
                     })
             } else {
-                res.send(resObj)
+                res.json(resObj).status(200)
             }
         })
 
@@ -67,21 +73,10 @@ router.route("/doneTask").post(async function (req, res) {
     }
     console.log(credentials.name);
     await db_connect.collection("doneTasks")
-        .insertOne(credentials, function (err, res) {
-            if (err) throw err
-            // res.status(200)
-            console.log("Inlagt task");
+        .insertOne(credentials, function (err, result) {
+            if (err) response.status(400)
+            res.status(200)
         })
-
-    // await db_connect.collection("accounts")
-    //     .updateOne(findPlayer, {
-    //         $pull: {
-    //             tasksInProgress: {
-    //                 name: credentials.name
-
-    //             }
-    //         }
-    //     })
 
     let updated = {
         $pull: {
@@ -94,16 +89,12 @@ router.route("/doneTask").post(async function (req, res) {
 
     await db_connect.collection("accounts")
         .updateOne(findPlayer, updated, function (err, result) {
-            if (err) throw err
-            // res.status(200)
+            if (err) response.status(400)
+            res.status(200)
         })
 
-
-
-
-
-
 })
+
 
 // Ta bort pågående uppgift
 router.route("/deleteTask").delete(async function (req, res) {
@@ -112,18 +103,24 @@ router.route("/deleteTask").delete(async function (req, res) {
     let findPlayer = {
         _id: ObjectId(credentials.userId)
     }
+
+    let updated = {
+        $pull: {
+            tasksInProgress: {
+                name: credentials.chosenTask.name
+
+            }
+        }
+    }
+
     //Hitta en random uppgift som stämmer överens med det man efterfrågar (level och ämne)
     await db_connect.collection("accounts")
-        .updateOne(findPlayer, {
-            $pull: {
-                tasksInProgress: {
-                    name: credentials.chosenTask.name
-
-                }
-            }
+        .updateOne(findPlayer, updated, function (err, result) {
+            if (err) response.status(400)
+            res.status(200)
         })
 
-    res.json() // denna krävs?? vrf??
+
 })
 
 
@@ -147,23 +144,30 @@ router.route("/sendNewTask").post(async function (req, res) {
         level: credentials.level
     }
 
+    let updated = {
+        $push: {
+            tasks: credentials.task
+        }
+    }
+
     db_connect.collection("tasks")
         .findOne({
             subject: credentials.subject,
             level: credentials.level
         }, async function (err, isMatch) {
+            if (err) response.status(400)
+
             if (isMatch) {
                 await db_connect.collection("tasks")
-                    .updateOne(findCategory, {
-                        $push: {
-                            tasks: credentials.task
-                        }
+                    .updateOne(findCategory, updated, function (err, result) {
+                        if (err) response.status(400)
+                        res.status(200)
                     })
             } else {
                 await db_connect.collection("tasks")
-                    .insertOne(newCategory, function (err, res) {
-                        if (err) throw err
-                        // res.status(200)
+                    .insertOne(newCategory, function (err, resutl) {
+                        if (err) response.status(400)
+                        res.status(200)
                     })
             }
         })
