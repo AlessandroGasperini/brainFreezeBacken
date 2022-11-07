@@ -153,6 +153,7 @@ router.route("/addComment").post(async function (req, res) {
                 user: credentials.user,
                 likes: 0,
                 dislikes: 0,
+                timeStamp: credentials.today,
                 _id: ObjectId()
             }
         }

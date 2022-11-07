@@ -18,6 +18,7 @@ router.route("/addSubject").put(async function (req, res) {
         }, async function (err, isMatch) {
             if (isMatch.subjects.find(e => e.subject === credentials.subject)) {
                 console.log("Den finns, lägg inte till");
+                // res.status(400) ////
             } else {
                 console.log("Den finns inte, lägg till");
                 await db_connect.collection("accounts").updateOne(myquery, {
@@ -28,6 +29,7 @@ router.route("/addSubject").put(async function (req, res) {
                         }
                     }
                 })
+                // res.status(200)
             }
         })
     // 
@@ -36,7 +38,7 @@ router.route("/addSubject").put(async function (req, res) {
 
 router.route("/removeSubject").delete(async function (req, res) {
     const credentials = req.body
-    console.log(credentials);
+    console.log("jdsajkodjasocaso", credentials);
     let db_connect = dbo.getDb()
     let findPlayer = {
         _id: ObjectId(credentials.id)

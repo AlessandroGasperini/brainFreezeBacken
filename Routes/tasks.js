@@ -68,18 +68,41 @@ router.route("/doneTask").post(async function (req, res) {
     console.log(credentials.name);
     await db_connect.collection("doneTasks")
         .insertOne(credentials, function (err, res) {
+            if (err) throw err
+            // res.status(200)
             console.log("Inlagt task");
         })
 
-    await db_connect.collection("accounts")
-        .updateOne(findPlayer, {
-            $pull: {
-                tasksInProgress: {
-                    name: credentials.name
+    // await db_connect.collection("accounts")
+    //     .updateOne(findPlayer, {
+    //         $pull: {
+    //             tasksInProgress: {
+    //                 name: credentials.name
 
-                }
+    //             }
+    //         }
+    //     })
+
+    let updated = {
+        $pull: {
+            tasksInProgress: {
+                name: credentials.name
+
             }
+        }
+    }
+
+    await db_connect.collection("accounts")
+        .updateOne(findPlayer, updated, function (err, result) {
+            if (err) throw err
+            // res.status(200)
         })
+
+
+
+
+
+
 })
 
 // Ta bort pågående uppgift
@@ -100,7 +123,7 @@ router.route("/deleteTask").delete(async function (req, res) {
             }
         })
 
-    res.json()
+    res.json() // denna krävs?? vrf??
 })
 
 
@@ -139,7 +162,8 @@ router.route("/sendNewTask").post(async function (req, res) {
             } else {
                 await db_connect.collection("tasks")
                     .insertOne(newCategory, function (err, res) {
-                        console.log("Inlagt ny taskämne");
+                        if (err) throw err
+                        // res.status(200)
                     })
             }
         })

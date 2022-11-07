@@ -49,7 +49,6 @@ router.route("/addAccount").post(async (req, response) => {
                         .insertOne(credentials, function (err, res) {
                             if (err) throw err
                             response.json(resObj)
-                            // response.status(200)
                         })
                 }
             })
@@ -112,7 +111,6 @@ router.route("/getAllUserInfo").post(async (request, response) => {
     const credentials = request.body
 
     let db_connect = dbo.getDb()
-
 
     db_connect.collection('accounts').findOne({
         _id: ObjectId(credentials.id)

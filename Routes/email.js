@@ -45,7 +45,6 @@ router.route("/resetPassword").post(async function (req, res) {
                         console.log("Email sent: ", info.response);
                     }
                 })
-
             } else {
                 res.json(noEmail)
             }
