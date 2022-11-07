@@ -11,7 +11,6 @@ const ObjectId = require("mongodb").ObjectId;
 // Skapa konto
 router.route("/addAccount").post(async (req, response) => {
     const credentials = req.body
-    console.log(credentials);
     const resObj = {
         success: true,
         usernameExists: false,
@@ -27,11 +26,12 @@ router.route("/addAccount").post(async (req, response) => {
     db_connect.collection('accounts').findOne({
         username: credentials.username
     }, async function (err, isMatch) {
+        if (err) throw err
         if (isMatch) {
             if (isMatch.username === credentials.username) {
                 resObj.usernameExists = true
                 resObj.success = false
-                response.json(resObj)
+                response.json(resObj).status(200).send('Found');
             }
         } else {
             db_connect.collection('accounts').findOne({
@@ -41,14 +41,14 @@ router.route("/addAccount").post(async (req, response) => {
                     if (isMatch.email === credentials.email) {
                         resObj.emailExists = true
                         resObj.success = false
-                        response.json(resObj)
+                        response.json(resObj).status(200).send('Found');
                     }
                 } else {
                     let db_connect = dbo.getDb()
                     db_connect.collection("accounts")
                         .insertOne(credentials, function (err, res) {
                             if (err) throw err
-                            response.json(resObj)
+                            response.json(resObj).status(200).send('Found');
                         })
                 }
             })
@@ -79,9 +79,10 @@ router.route("/login").post(async (req, response) => {
     db_connect.collection('accounts').findOne({
         username: credentials.username
     }, async function (err, isMatch) {
+        if (err) throw err
         if (!isMatch) {
             console.log('WRONG USERNAME')
-            response.json(resObj)
+            response.json(resObj).status(200).send('Found');
         } else {
             console.log('CORRECT USERNAME')
             resObj.usernameExists = true
@@ -99,9 +100,9 @@ router.route("/login").post(async (req, response) => {
                 });
                 resObj.token = token
                 resObj.success = true
-                response.json(resObj)
+                response.json(resObj).status(200).send('Found');
             } else {
-                response.json(resObj)
+                response.json(resObj).status(200).send('Found');
             }
         }
     })
@@ -115,11 +116,13 @@ router.route("/getAllUserInfo").post(async (request, response) => {
     db_connect.collection('accounts').findOne({
         _id: ObjectId(credentials.id)
     }, async function (err, isMatch) {
+        if (err) throw err
+
         let sendInfo = {
             ...isMatch,
             password: "****"
         }
-        response.json(sendInfo)
+        response.json(sendInfo).status(200).send('Found');
     })
 })
 
@@ -150,7 +153,7 @@ router.get('/', async (request, response) => {
     } catch (error) {
         resObj.errorMessage = 'Token expired';
     }
-    response.json(resObj);
+    response.json(resObj).status(200).send('Found');
 });
 
 
