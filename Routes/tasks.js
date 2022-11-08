@@ -31,7 +31,7 @@ router.route("/serachTasks").post(async function (req, res) {
                         _id: ObjectId(credentials.id)
                     }, async function (err, player) {
                         if (err) res.status(400)
-
+                        // Om uppgiften redan finns (lägg inte till samma)
                         if (player.tasksInProgress.find(e => e.name === randomTask.name)) {
                             resObj.taskAlreadyExists = true
                             console.log("Denna uppgift är redan tilllagd i din profil");
@@ -67,7 +67,7 @@ router.route("/doneTask").post(async function (req, res) {
     }
     console.log(credentials.name);
     await db_connect.collection("doneTasks")
-        .insertOne(credentials, function (err, res) {
+        .insertOne(credentials, function (err, result) {
             if (err) res.status(400)
             res.status(200)
         })
@@ -98,7 +98,7 @@ router.route("/deleteTask").delete(async function (req, res) {
             }
         }
     }
-    //Hitta en random uppgift som stämmer överens med det man efterfrågar (level och ämne)
+
     await db_connect.collection("accounts")
         .updateOne(findPlayer, updated, function (err, result) {
             if (err) {
@@ -110,7 +110,8 @@ router.route("/deleteTask").delete(async function (req, res) {
 })
 
 
-// Lägg till ny uppgift
+// Lägg till ny uppgift (om kategorin med samma nivå finns pushas den in i den arrayen)
+// om den kategorin och leveln inte finns skapas ett helt nyss obj som andra kan lägga till i
 router.route("/sendNewTask").post(async function (req, res) {
     let credentials = req.body
     console.log(credentials);
@@ -133,9 +134,10 @@ router.route("/sendNewTask").post(async function (req, res) {
             subject: credentials.subject,
             level: credentials.level
         }, async function (err, isMatch) {
-            if (err) throw res.status(400)
+            if (err) throw err
+            // res.status(400) // Laggar lite hmmmmm why why
             if (isMatch) {
-                res.status(200)
+                // res.status(200) // Laggar lite hmmmmm why why
                 await db_connect.collection("tasks")
                     .updateOne(findCategory, {
                         $push: {
@@ -144,10 +146,12 @@ router.route("/sendNewTask").post(async function (req, res) {
                     })
             } else {
                 await db_connect.collection("tasks")
-                    .insertOne(newCategory, function (err, res) {
-                        if (err) throw res.status(400)
-                        res.status(200)
+                    .insertOne(newCategory, function (err, result) {
+                        if (err) throw err
+                        // res.status(400) hej hallå du är fett jobbig vrf laggar du?
+                        // res.status(200) du med?
                     })
+
             }
         })
 })

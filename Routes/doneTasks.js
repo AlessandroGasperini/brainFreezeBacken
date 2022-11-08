@@ -5,10 +5,9 @@ const dbo = require("../db/connect")
 
 const ObjectId = require("mongodb").ObjectId;
 
-
+// Hämtar alla gjorda uppgifter av användaren
 router.route("/allMyDoneTasks").post(async function (req, res) {
     const credentials = req.body
-    console.log(credentials);
     let db_connect = dbo.getDb()
 
     db_connect.collection("doneTasks")
@@ -22,7 +21,7 @@ router.route("/allMyDoneTasks").post(async function (req, res) {
 
 })
 
-
+// Skickar in like eller dislike på en kommentar + lägger in det i feedbackUsers Arr  
 router.route("/likeComment").put(async function (req, res) {
     let credentials = req.body
 
@@ -40,7 +39,7 @@ router.route("/likeComment").put(async function (req, res) {
         .findOne({
             _id: ObjectId(credentials.id)
         }, async function (err, isMatch) {
-            if (err) response.status(400)
+            if (err) res.status(400)
 
             const newArr = isMatch.feedback.map(obj => {
                 if (credentials.likeOrDislike === "like") {
@@ -63,7 +62,7 @@ router.route("/likeComment").put(async function (req, res) {
                 }
             })
 
-
+            // Lägger in och pushar till nya arrayerna
             let newObject = {
                 $set: {
                     _id: isMatch._id,
@@ -100,7 +99,7 @@ router.route("/likeComment").put(async function (req, res) {
 
 
 
-// Hämta allas gjorda tasks
+// Hämta allas gjorda tasks som gjords (bara de ämne som användare sökt på)
 router.route("/allTasks").post(async function (req, res) {
     const credentials = req.body
     let db_connect = dbo.getDb()
@@ -111,7 +110,7 @@ router.route("/allTasks").post(async function (req, res) {
 
         })
         .toArray(function (err, result) {
-            if (err) response.status(400)
+            if (err) res.status(400)
             res.json(result).status(200)
         })
 
@@ -126,14 +125,14 @@ router.route("/allSubjects").get(async function (req, res) {
     db_connect.collection("subjects")
         .find({})
         .toArray(function (err, result) {
-            if (err) response.status(400)
+            if (err) res.status(400)
             res.json(result).status(200)
         })
 })
 
 
 
-// Lägg till kommentar
+// Lägger till kommentar
 router.route("/addComment").post(async function (req, res) {
     const credentials = req.body
     console.log(credentials);
@@ -160,7 +159,7 @@ router.route("/addComment").post(async function (req, res) {
         .findOne({
             _id: ObjectId(credentials.questionId)
         }, async function (err, isMatch) {
-            if (err) response.status(400)
+            if (err) res.status(400)
             res.json(isMatch.feedback).status(200)
         })
 

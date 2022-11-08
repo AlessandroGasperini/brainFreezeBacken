@@ -8,7 +8,7 @@ const dbo = require("../db/connect")
 const ObjectId = require("mongodb").ObjectId;
 
 
-// Skapa konto
+// Skapa nytt konto
 router.route("/addAccount").post(async (req, response) => {
     const credentials = req.body
     const resObj = {
@@ -16,13 +16,13 @@ router.route("/addAccount").post(async (req, response) => {
         usernameExists: false,
         emailExists: false,
     };
-
+    // Hasha lösenordet
     const hashedPassword = await bcryptFunctions.hashPassword(credentials.password);
     credentials.password = hashedPassword;
 
     let db_connect = dbo.getDb()
 
-
+    // Se om användarnamnet redan finns i annat konto
     db_connect.collection('accounts').findOne({
         username: credentials.username
     }, async function (err, isMatch) {
@@ -34,6 +34,7 @@ router.route("/addAccount").post(async (req, response) => {
                 response.json(resObj).status(200)
             }
         } else {
+            // Se om emailen redan finns i annat konto
             db_connect.collection('accounts').findOne({
                 email: credentials.email
             }, async function (err, isMatch) {
@@ -43,7 +44,7 @@ router.route("/addAccount").post(async (req, response) => {
                     if (isMatch.email === credentials.email) {
                         resObj.emailExists = true
                         resObj.success = false
-                        res.json(resObj).status(200)
+                        response.json(resObj).status(200)
                     }
                 } else {
                     let db_connect = dbo.getDb()
@@ -51,6 +52,7 @@ router.route("/addAccount").post(async (req, response) => {
                         .insertOne(credentials, function (err, result) {
                             if (err) response.status(400)
                             else
+                                // Nytt konto skapas
                                 response.json(resObj).status(200)
                         })
                 }
@@ -73,12 +75,12 @@ router.route("/login").post(async (req, response) => {
         lastname: "",
         _id: "",
         subjects: null,
-        token: "",
         tasksInProgress: []
     };
 
     let db_connect = dbo.getDb()
 
+    // Hitta hontot med användarnamnet
     db_connect.collection('accounts').findOne({
         username: credentials.username
     }, async function (err, isMatch) {
@@ -87,6 +89,7 @@ router.route("/login").post(async (req, response) => {
             console.log('WRONG USERNAME')
             response.json(resObj).status(200)
         } else {
+            // Se om lösenordet stämmer
             console.log('CORRECT USERNAME')
             resObj.usernameExists = true
             const correctPassword = await bcryptFunctions.comparePassword(credentials.password, isMatch.password);
@@ -96,12 +99,6 @@ router.route("/login").post(async (req, response) => {
                 resObj._id = isMatch._id
                 resObj.subjects = isMatch.subjects
                 resObj.tasksInProgress = isMatch.tasksInProgress
-                const token = jwt.sign({
-                    username: isMatch.username
-                }, "goodagain", {
-                    expiresIn: 600
-                });
-                resObj.token = token
                 resObj.success = true
                 response.json(resObj).status(200)
             } else {
@@ -111,6 +108,7 @@ router.route("/login").post(async (req, response) => {
     })
 })
 
+// Hämta användarens info men visar inte lösenordet i sessionstorge
 router.route("/getAllUserInfo").post(async (request, response) => {
     const credentials = request.body
 
@@ -130,39 +128,7 @@ router.route("/getAllUserInfo").post(async (request, response) => {
 })
 
 
-
-
-
-
-
-
-
-
-
-
-//kolla om användaren är inloggad
-router.get('/', async (request, response) => {
-    let resObj = {
-        loggedIn: false
-    };
-
-    const token = request.headers.authorization.replace('Bearer ', '');
-    try {
-        //jämför vår token mot den satta
-        const data = jwt.verify(token, 'goodgood');
-        if (data) {
-            resObj.loggedIn = true;
-        }
-    } catch (error) {
-        resObj.errorMessage = 'Token expired';
-    }
-    response.json(resObj).status(200).send('Found');
-});
-
-
-
-
-
+// Byt lösenord
 router.route("/changePassword").post(async (req, response) => {
     const credentials = req.body
     console.log(credentials);
@@ -174,7 +140,7 @@ router.route("/changePassword").post(async (req, response) => {
     let findPlayer = {
         email: credentials.email
     }
-
+    // Hitta användaren med hjälp av email
     await db_connect.collection("accounts")
         .updateOne(findPlayer, {
             $set: {

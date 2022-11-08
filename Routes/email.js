@@ -4,7 +4,7 @@ const router = express.Router()
 
 const dbo = require("../db/connect")
 
-
+// Skickar bekräftelsekod för att ändra lösenord. Om emailen stämmer
 router.route("/resetPassword").post(async function (req, res) {
     let emailData = req.body
 
@@ -17,7 +17,7 @@ router.route("/resetPassword").post(async function (req, res) {
         .findOne({
             email: emailData.to
         }, async function (err, isMatch) {
-            if (err) response.status(400)
+            if (err) res.status(400)
             if (isMatch) {
                 noEmail.res = true
                 res.json(noEmail).status(200)
